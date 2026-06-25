@@ -2,9 +2,12 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches-ignore:
+    branches:
       - main
+  push:
+    branches:
+      - main
+      - dependabot/**
   workflow_dispatch:
 
 permissions:

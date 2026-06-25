@@ -5,11 +5,18 @@
 
 Pulse Chat is a compact realtime web chat built on React, Vite, Tailwind CSS and Firebase. The project is prepared for static hosting and automatic deployment through GitHub Actions.
 
+## Screenshots
+
+| Desktop | Mobile |
+| --- | --- |
+| ![Pulse Chat desktop login](docs/screenshots/desktop-login.png) | ![Pulse Chat mobile login](docs/screenshots/mobile-login.png) |
+
 ## What Is Inside
 
 - Google sign-in through Firebase Authentication.
 - Realtime messages from Firestore collection `messages`.
 - Responsive chat UI for desktop and mobile screens.
+- Polished motion, focus states and reduced-motion fallback.
 - Loading, empty, offline and Firebase error states.
 - Vite production build with GitHub Pages base-path support.
 - CI/CD workflows, dependency update automation and PR checklist.
@@ -99,7 +106,7 @@ The repository has two GitHub Actions workflows:
 
 | Workflow | Trigger | What It Does |
 | --- | --- | --- |
-| `CI` | pull requests, non-main pushes, manual run | `npm ci`, production audit, production build |
+| `CI` | pull requests to `main`, pushes to `main` and `dependabot/**`, manual run | `npm ci`, production audit, production build |
 | `Deploy GitHub Pages` | push to `main`, manual run | quality gate, build, upload `dist`, publish to GitHub Pages |
 
 To enable deployment:
@@ -116,6 +123,19 @@ https://stepandrogin.github.io/chat/
 ```
 
 If you deploy behind a custom domain, add repository variable `VITE_BASE_PATH` with value `/`.
+
+## Repository Protection
+
+Protect `main` in GitHub before accepting outside changes:
+
+1. Open repository Settings -> Rules -> Rulesets.
+2. Create a branch ruleset for `main`.
+3. Enable blocking force pushes and branch deletion.
+4. Require pull requests before merging.
+5. Require the `Quality gate` status check from the `CI` workflow.
+6. Save the ruleset in active mode.
+
+Dependabot intentionally ignores `tailwindcss` semver-major updates. Tailwind v4 needs a planned migration of the PostCSS and `@apply` setup, so it should not be merged as a routine dependency bump.
 
 ## Project Structure
 

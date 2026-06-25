@@ -13,6 +13,10 @@ updates:
         dependency-type: production
       development-dependencies:
         dependency-type: development
+    ignore:
+      - dependency-name: tailwindcss
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
@@ -22,3 +26,7 @@ updates:
       time: "09:30"
       timezone: Europe/Moscow
     open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"

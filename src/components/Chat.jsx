@@ -36,6 +36,8 @@ const channelItems = [
   { icon: Settings, label: 'Настройки', active: false }
 ];
 
+const MAX_MESSAGE_LENGTH = 2000;
+
 const formatTime = (createdAt) => {
   const date = createdAt?.toDate?.();
 
@@ -60,7 +62,7 @@ const Avatar = ({ displayName, photoURL }) => {
     return (
       <img
         alt={displayName || 'Пользователь'}
-        className="h-10 w-10 shrink-0 rounded-lg border border-line object-cover"
+        className="interactive-lift h-10 w-10 shrink-0 rounded-lg border border-line object-cover"
         referrerPolicy="no-referrer"
         src={photoURL}
       />
@@ -68,7 +70,7 @@ const Avatar = ({ displayName, photoURL }) => {
   }
 
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-sm font-semibold text-teal-700">
+    <div className="interactive-lift flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-sm font-semibold text-teal-700">
       {getInitials(displayName)}
     </div>
   );
@@ -105,7 +107,7 @@ const MessageRow = ({ message, user }) => {
   const displayName = message.displayName || 'Пользователь';
 
   return (
-    <article className={`flex gap-3 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+    <article className={`motion-panel flex gap-3 ${isOwn ? 'justify-end' : 'justify-start'}`}>
       {!isOwn ? <Avatar displayName={displayName} photoURL={message.photoURL} /> : null}
 
       <div className={`flex max-w-[min(78vw,560px)] flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
@@ -115,7 +117,7 @@ const MessageRow = ({ message, user }) => {
         </div>
 
         <div
-          className={`rounded-lg px-5 py-4 text-sm leading-6 ${
+          className={`interactive-lift rounded-lg px-5 py-4 text-sm leading-6 ${
             isOwn
               ? 'bg-teal-600 text-white shadow-message'
               : 'border border-line bg-white text-ink'
@@ -202,7 +204,8 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
   }, [messages.length]);
 
   const visibleError = authError || messagesError || sendError;
-  const canSend = composerValue.trim().length > 0 && !isSending && !messagesError;
+  const remainingCharacters = MAX_MESSAGE_LENGTH - composerValue.length;
+  const canSend = composerValue.trim().length > 0 && remainingCharacters >= 0 && !isSending && !messagesError;
 
   const memberCount = useMemo(() => {
     const ids = new Set(messages.map((message) => message.uid).filter(Boolean));
@@ -216,6 +219,11 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
     const text = composerValue.trim();
 
     if (!text || !firestore || !user) {
+      return;
+    }
+
+    if (text.length > MAX_MESSAGE_LENGTH) {
+      setSendError(`Сообщение длиннее ${MAX_MESSAGE_LENGTH} символов.`);
       return;
     }
 
@@ -256,14 +264,14 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
         <aside className="hidden border-r border-line bg-panel px-5 py-6 lg:block">
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600 text-white shadow-message">
+              <div className="flex h-10 w-10 animate-float-soft items-center justify-center rounded-lg bg-teal-600 text-white shadow-message">
                 <MessageCircle aria-hidden="true" className="h-5 w-5" />
               </div>
               <h1 className="ui-title text-xl">Pulse Chat</h1>
             </div>
             <button
               aria-label="Открыть меню"
-              className="ui-button h-9 w-9 border border-line bg-white text-muted hover:text-ink"
+              className="ui-button interactive-lift h-9 w-9 border border-line bg-white text-muted hover:text-ink"
               type="button"
             >
               <Menu aria-hidden="true" className="h-4 w-4" />
@@ -273,7 +281,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
           <nav className="space-y-2">
             {channelItems.map(({ active, icon: Icon, label }) => (
               <button
-                className={`ui-button w-full justify-start px-3 py-3 ${
+                className={`ui-button interactive-lift w-full justify-start px-3 py-3 ${
                   active
                     ? 'bg-teal-50 text-teal-700'
                     : 'text-muted hover:bg-slate-50 hover:text-ink'
@@ -287,7 +295,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
             ))}
           </nav>
 
-          <section className="mt-8 rounded-lg border border-line bg-white p-4">
+          <section className="surface-panel mt-8 rounded-lg bg-white p-4">
             <h2 className="ui-title text-sm">Профиль</h2>
             <div className="mt-4 flex items-center gap-3">
               <Avatar displayName={user.displayName || 'Вы'} photoURL={user.photoURL} />
@@ -302,7 +310,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
         </aside>
 
         <section className="flex min-h-screen min-w-0 flex-col">
-          <header className="flex min-h-[76px] items-center justify-between border-b border-line bg-panel px-4 py-4 sm:px-6">
+          <header className="sticky top-0 z-10 flex min-h-[76px] items-center justify-between border-b border-line bg-panel/95 px-4 py-4 backdrop-blur sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
                 <Hash aria-hidden="true" className="h-5 w-5" />
@@ -322,7 +330,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
             <div className="flex items-center gap-2">
               <ConnectionBadge hasError={Boolean(visibleError)} isOnline={isOnline} />
               <button
-                className="ui-button border border-line bg-white px-3 py-2 text-muted hover:text-ink"
+                className="ui-button interactive-lift border border-line bg-white px-3 py-2 text-muted hover:text-ink"
                 disabled={isSigningOut}
                 onClick={onLogout}
                 type="button"
@@ -336,14 +344,14 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
           </header>
 
           {visibleError ? (
-            <div className="border-b border-coral-500/30 bg-coral-50 px-4 py-3 text-sm text-coral-600 sm:px-6">
+            <div className="motion-panel border-b border-coral-500/30 bg-coral-50 px-4 py-3 text-sm text-coral-600 sm:px-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-3">
                   <AlertTriangle aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
                   <p className="leading-6">{visibleError}</p>
                 </div>
                 <button
-                  className="ui-button shrink-0 border border-coral-500/30 bg-white px-3 py-2 text-coral-600 hover:bg-coral-50"
+                  className="ui-button interactive-lift shrink-0 border border-coral-500/30 bg-white px-3 py-2 text-coral-600 hover:bg-coral-50"
                   onClick={() => window.location.reload()}
                   type="button"
                 >
@@ -354,11 +362,11 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
             </div>
           ) : null}
 
-          <div className="scrollbar-soft flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div aria-live="polite" className="scrollbar-soft flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
             {messagesLoading ? (
               <div className="flex min-h-[48vh] items-center justify-center">
                 <div className="text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+                  <div className="mx-auto mb-4 flex h-12 w-12 animate-pulse items-center justify-center rounded-lg bg-teal-50 text-teal-700">
                     <Radio aria-hidden="true" className="h-6 w-6" />
                   </div>
                   <h3 className="ui-title text-lg">Загружаем сообщения</h3>
@@ -375,7 +383,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
             ) : (
               <div className="flex min-h-[48vh] items-center justify-center">
                 <div className="max-w-sm text-center">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+                  <div className="mx-auto mb-4 flex h-14 w-14 animate-float-soft items-center justify-center rounded-lg bg-teal-50 text-teal-700">
                     <MessageCircle aria-hidden="true" className="h-7 w-7" />
                   </div>
                   <h3 className="ui-title text-xl">Сообщений пока нет</h3>
@@ -387,19 +395,39 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
             )}
           </div>
 
-          <form className="border-t border-line bg-panel p-4 sm:p-5" onSubmit={handleSubmit}>
-            <div className="flex items-end gap-3 rounded-lg border border-line bg-white p-3 shadow-soft">
-              <textarea
-                className="max-h-36 min-h-12 flex-1 resize-none border-0 bg-transparent px-2 py-3 text-sm leading-6 text-ink outline-none placeholder:text-muted"
-                disabled={Boolean(messagesError)}
-                onChange={(event) => setComposerValue(event.target.value)}
-                onKeyDown={handleComposerKeyDown}
-                placeholder="Сообщение в #general"
-                rows={1}
-                value={composerValue}
-              />
+          <form className="border-t border-line bg-panel p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-5 sm:pb-[calc(1.25rem+env(safe-area-inset-bottom))]" onSubmit={handleSubmit}>
+            <div className="composer-shell flex items-end gap-3 rounded-lg p-3">
+              <div className="min-w-0 flex-1">
+                <textarea
+                  className="max-h-36 min-h-12 w-full resize-none border-0 bg-transparent px-2 py-3 text-sm leading-6 text-ink outline-none placeholder:text-muted"
+                  disabled={Boolean(messagesError)}
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  onChange={(event) => {
+                    setComposerValue(event.target.value);
+                    if (sendError) {
+                      setSendError('');
+                    }
+                  }}
+                  onKeyDown={handleComposerKeyDown}
+                  placeholder="Сообщение в #general"
+                  rows={1}
+                  value={composerValue}
+                />
+                <div className="flex items-center justify-between px-2 pb-1">
+                  <span className="ui-span text-[11px] font-medium text-muted">
+                    {isOnline ? 'online' : 'offline'}
+                  </span>
+                  <span
+                    className={`ui-span text-[11px] font-medium ${
+                      remainingCharacters < 120 ? 'text-coral-600' : 'text-muted'
+                    }`}
+                  >
+                    {composerValue.length}/{MAX_MESSAGE_LENGTH}
+                  </span>
+                </div>
+              </div>
               <button
-                className="ui-button shrink-0 bg-teal-600 px-4 py-3 text-white shadow-message hover:bg-teal-700"
+                className="ui-button interactive-lift shrink-0 bg-teal-600 px-4 py-3 text-white shadow-message hover:bg-teal-700"
                 disabled={!canSend}
                 type="submit"
               >
@@ -426,7 +454,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
           </section>
 
           <section className="mt-7 space-y-3">
-            <div className="rounded-lg border border-line bg-white p-4">
+            <div className="interactive-lift rounded-lg border border-line bg-white p-4">
               <div className="flex items-center gap-3">
                 <ShieldCheck aria-hidden="true" className="h-5 w-5 text-teal-600" />
                 <h3 className="ui-title text-sm">Сессия</h3>
@@ -435,7 +463,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
                 {user.displayName || 'Пользователь'} в комнате.
               </p>
             </div>
-            <div className="rounded-lg border border-line bg-white p-4">
+            <div className="interactive-lift rounded-lg border border-line bg-white p-4">
               <div className="flex items-center gap-3">
                 <UsersRound aria-hidden="true" className="h-5 w-5 text-teal-600" />
                 <h3 className="ui-title text-sm">Участники</h3>
@@ -444,7 +472,7 @@ const Chat = ({ authError, isSigningOut, onLogout, user }) => {
                 Сейчас в ленте видно {memberCount} уникальных профилей.
               </p>
             </div>
-            <div className="rounded-lg border border-line bg-white p-4">
+            <div className="interactive-lift rounded-lg border border-line bg-white p-4">
               <div className="flex items-center gap-3">
                 <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-teal-600" />
                 <h3 className="ui-title text-sm">Соединение</h3>
