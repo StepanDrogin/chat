@@ -81,24 +81,15 @@ Enable these Firebase services:
 
 The chat reads and writes documents in the `messages` collection ordered by `createdAt`.
 
-Recommended Firestore rule shape:
+Recommended Firestore rules are stored in `firestore.rules`:
 
-```js
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /messages/{messageId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.text is string
-        && request.resource.data.text.size() > 0
-        && request.resource.data.text.size() <= 2000;
-    }
-  }
-}
+```bash
+firebase deploy --only firestore:rules --project chat-fddc5
 ```
+
+You can also paste the same rules manually in Firebase Console:
+
+`Firestore Database -> Rules -> Publish`
 
 Tune rules to your real moderation and retention requirements before production use.
 
