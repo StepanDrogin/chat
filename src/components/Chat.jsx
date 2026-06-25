@@ -105,14 +105,17 @@ const ConnectionBadge = ({ hasError, isOnline }) => {
 const MessageRow = ({ message, user }) => {
   const isOwn = message.uid === user.uid;
   const displayName = message.displayName || 'Пользователь';
+  const authorName = isOwn ? 'Вы' : displayName;
+  const avatarName = isOwn ? user.displayName || 'Вы' : displayName;
+  const avatarUrl = isOwn ? user.photoURL : message.photoURL;
 
   return (
-    <article className={`motion-panel flex gap-3 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-      {!isOwn ? <Avatar displayName={displayName} photoURL={message.photoURL} /> : null}
+    <article className="motion-panel flex items-start justify-start gap-3">
+      <Avatar displayName={avatarName} photoURL={avatarUrl} />
 
-      <div className={`flex max-w-[min(78vw,560px)] flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-        <div className={`mb-2 flex items-center gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
-          <p className="text-sm font-semibold text-ink">{isOwn ? 'Вы' : displayName}</p>
+      <div className="flex max-w-[min(78vw,560px)] flex-col items-start">
+        <div className="mb-2 flex min-h-10 items-center gap-3">
+          <p className="text-sm font-semibold text-ink">{authorName}</p>
           <time className="text-xs text-muted">{formatTime(message.createdAt)}</time>
         </div>
 
@@ -126,8 +129,6 @@ const MessageRow = ({ message, user }) => {
           <p className="whitespace-pre-wrap break-words">{message.text}</p>
         </div>
       </div>
-
-      {isOwn ? <Avatar displayName={user.displayName || 'Вы'} photoURL={user.photoURL} /> : null}
     </article>
   );
 };
