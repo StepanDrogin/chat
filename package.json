@@ -12,10 +12,10 @@
     "check": "npm run audit:prod && npm run build"
   },
   "dependencies": {
-    "firebase": "^12.15.0",
-    "lucide-react": "^0.468.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "firebase": "^12.16.0",
+    "lucide-react": "^1.24.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.3",
